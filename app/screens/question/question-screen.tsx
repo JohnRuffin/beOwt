@@ -8,7 +8,13 @@ import { color, spacing } from "../../theme"
 
 const ROOT: ViewStyle = {
   backgroundColor: color.background,
+  paddingHorizontal: spacing.large,
   flex: 1,
+}
+
+const HEADER_CONTAINER: ViewStyle = {
+  marginTop: spacing.huge,
+  marginBottom: spacing.medium,
 }
 
 export const QuestionScreen = observer(function QuestionScreen() {
@@ -19,7 +25,9 @@ export const QuestionScreen = observer(function QuestionScreen() {
   // const navigation = useNavigation()
   return (
     <Screen style={ROOT} preset="scroll">
-      <Text preset="header" text="" />
+      <View style={HEADER_CONTAINER}>
+        <Text preset="header" tx="questionScreen.header" />
+      </View>
     </Screen>
   )
 })
