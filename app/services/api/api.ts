@@ -2,7 +2,24 @@ import { ApisauceInstance, create, ApiResponse } from "apisauce"
 import { getGeneralApiProblem } from "./api-problem"
 import { ApiConfig, DEFAULT_API_CONFIG } from "./api-config"
 import * as Types from "./api.types"
+import { QuestionSnapshot } from "../../models/question/question"
+import * as uuid from "react-native-uuid"
 
+const API_PAGE_SIZE = 50
+
+const convertQuestion = (raw: any): QuestionSnapshot => {
+  const id = uuid.default.toString()
+
+  return {
+    id: id,
+    category: raw.category,
+    type: raw.type,
+    difficulty: raw.difficulty,
+    question: raw.question,
+    correctAnswer: raw.correct_answer,
+    incorrectAnswers: raw.incorrect_answers,
+  }
+}
 /**
  * Manages all requests to the API.
  */
@@ -42,6 +59,27 @@ export class Api {
         Accept: "application/json",
       },
     })
+  }
+
+  async getQuestions(): Promise<Types.GetQuestionsResult> {
+    // make the api call
+    const response: ApiResponse<any> = await this.apisauce.get("", { amount: API_PAGE_SIZE })
+
+    // the typical ways to die when calling an api
+    if (!response.ok) {
+      const problem = getGeneralApiProblem(response)
+      if (problem) return problem
+    }
+
+    // transform the data into the format we are expecting
+    try {
+      const rawQuestions = response.data.results
+      const convertedQuestions: QuestionSnapshot[] = rawQuestions.map(convertQuestion)
+      return { kind: "ok", questions: convertedQuestions }
+    } catch (e) {
+      __DEV__ && console.tron.log(e.message)
+      return { kind: "bad-data" }
+    }
   }
 
   /**
